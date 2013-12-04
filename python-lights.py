@@ -94,5 +94,7 @@ class LEDUtils(LEDControl):
         self.set_all('#000000')
         self.send()
 
-utils = LEDUtils()
-utils.all_on()
+# test:
+if __name__ == "__main__":
+    utils = LEDUtils()
+    utils.all_on()
