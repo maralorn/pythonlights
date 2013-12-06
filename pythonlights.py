@@ -24,7 +24,7 @@ def get_led_number(panel, position, colorid):
         raise ValueError("There are only 5 positions in a panel. Pick from 0 to 4. Not {0}".format(position))
     if colorid < 0 or colorid > 2:
         raise ValueError("Only 0 for red, 1 for green and 2 for blue are valid color ids. Not {0}".format(colorid))
-    return panel*16+position*3+colorid
+    return panel*16+position*3+colorid+1
 
 
 class Color(object):
@@ -97,4 +97,5 @@ class LEDUtils(LEDControl):
 # test:
 if __name__ == "__main__":
     utils = LEDUtils()
-    utils.all_on()
+    utils.set_all("#FF9933")
+    utils.send()
