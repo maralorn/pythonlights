@@ -17,7 +17,7 @@ while True:
     r = np.sum(spectrum[a*2:a*3])/peak
 
     print(r,g,b)
-    white = max(b,255)
+    white = max(int(b),255)
     color = pythonlights.Color((white,white,white))
     ctrl.set_all(color)
     ctrl.send()
