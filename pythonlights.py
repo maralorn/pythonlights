@@ -11,7 +11,6 @@ HEADER = b'Art-Net' + bytearray((00, # Protocol Name
     00,     # Physical
     00, 00, # Universe
     00, 80))# Payload length (5 Panels with 16 channels)
-print(repr(HEADER))
 
 # panel: 0-4
 # position: 0-4

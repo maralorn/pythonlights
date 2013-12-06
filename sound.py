@@ -5,7 +5,6 @@
 import pyaudio
 import numpy as np
 import time
-import matplotlib.pyplot as plt
 
 FORMAT = pyaudio.paInt16 
 CHANNELS = 2
