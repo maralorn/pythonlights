@@ -28,12 +28,12 @@ def get_led_number(panel, position, colorid):
 
 
 class Color(object):
-    def __init__(self, *args):
-        if args[0]:
-            if type(args[0]) == str:
-                self.parse_string(args[0])
-            if type(args[0]) == tuple:
-                self.values = list(args[0])
+    def __init__(self, values = None):
+        if values is not None:
+            if type(values) == str:
+                self.parse_string(values)
+            else:
+                self.values = list(values)
         else:
             self.values = [0,0,0]
 
@@ -58,8 +58,6 @@ class LEDControl(object):
         self.socket.send(package)
 
     def set_intensity(self, panel, position, colorid, value):
-        if type(value) != int:
-            raise TypeError('Color Value has to be an integer.')
         if value < 0 or value > 255:
             raise ValueError('Color Value has to be in [0,255]. Not {0}'.format(value))
         self.state[get_led_number(panel, position, colorid)] = value
