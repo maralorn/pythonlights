@@ -4,13 +4,14 @@ import socket
 
 HOST = '2.0.0.2'
 PORT = 6454
-HEADER = b'Art-Net' + bytes((00, # Protocol Name
+HEADER = b'Art-Net' + bytearray((00, # Protocol Name
     00, 80, # Opcode
     00, 14, # Protocol Version
     00,     # Sequence
     00,     # Physical
     00, 00, # Universe
     00, 80))# Payload length (5 Panels with 16 channels)
+print(repr(HEADER))
 
 # panel: 0-4
 # position: 0-4
@@ -54,7 +55,7 @@ class LEDControl(object):
         self.state = [255 for i in range(80)]
     
     def send(self):
-        package = HEADER+bytes(self.state)
+        package = HEADER+bytearray(self.state)
         self.socket.send(package)
 
     def set_intensity(self, panel, position, colorid, value):
