@@ -16,15 +16,13 @@ HEADER = b'Art-Net' + bytearray((00, # Protocol Name
 # position: 0-4
 # color: {0: red, 1: green, 2:blue}
 def get_led_number(panel, position, colorid):
-    if type(panel) != int or type(position) != int or type(colorid) != int:
-        raise TypeError("Panel, position and colorid have to be integers. They were: {0},{1},{2}".format(type(panel),type(position),type(colorid)))
     if panel < 0 or panel > 4:
         raise ValueError("There are only 5 panels. Pick from 0 to 4. Not {0}".format(panel))
     if position < 0 or position > 4:
         raise ValueError("There are only 5 positions in a panel. Pick from 0 to 4. Not {0}".format(position))
     if colorid < 0 or colorid > 2:
         raise ValueError("Only 0 for red, 1 for green and 2 for blue are valid color ids. Not {0}".format(colorid))
-    return panel*16+position*3+colorid+1
+    return int(panel)*16+int(position)*3+int(colorid)+1
 
 
 class Color(object):
@@ -62,7 +60,7 @@ class LEDControl(object):
     def set_intensity(self, panel, position, colorid, value):
         if value < 0 or value > 255:
             raise ValueError('Color Value has to be in [0,255]. Not {0}'.format(value))
-        self.state[get_led_number(panel, position, colorid)] = value
+        self.state[get_led_number(panel, position, colorid)] = int(value)
 
     def get_intensity(self, panel, position, colorid):
         return self.state[get_led_number(panel, position, colorid)]
