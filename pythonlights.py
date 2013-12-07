@@ -28,6 +28,7 @@ def get_led_number(panel, position, colorid):
 
 
 class Color(object):
+    # Takes a string '#rrggbb' or a iterable of 3 integers
     def __init__(self, values = None):
         if values is not None:
             if type(values) == str:
@@ -52,7 +53,8 @@ class LEDControl(object):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.connect((HOST, PORT))
         self.state = [255 for i in range(80)]
-    
+   
+    # Call this method or nothing will happen!! 
     def send(self):
         package = HEADER+bytearray(self.state)
         self.socket.send(package)
@@ -65,20 +67,24 @@ class LEDControl(object):
     def get_intensity(self, panel, position, colorid):
         return self.state[get_led_number(panel, position, colorid)]
 
+    # Set color auf LED Tripel at specified position.
     def set_color(self, panel, position, color):
         if type(color) != Color:
             color = Color(color)
         for colorid, value in enumerate(color.values):
             self.set_intensity(panel, position, colorid, value)
     
+    # Set color auf LED Tripel at specified position on every panel.
     def set_position(self, position, color):
         for panel in range(5):
             self.set_color(panel, position, color)
 
+    # Set color auf LED Tripel at all positions on one panel.
     def set_panel(self, panel, color):
         for position in range(5):
             self.set_color(panel, position, color)
 
+    # Set color auf LED Tripel everywhere.
     def set_all(self, color):
         for panel in range(5): 
             self.set_panel(panel, color)
@@ -95,5 +101,4 @@ class LEDUtils(LEDControl):
 # test:
 if __name__ == "__main__":
     utils = LEDUtils()
-    utils.set_all("#FF9933")
-    utils.send()
+    utils.all_on()

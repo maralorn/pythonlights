@@ -1,10 +1,9 @@
 #!/usr/bin/python
 
-# open a microphone in pyAudio and listen to it
+# open a microphone in pyAudio and get its FFT spectrum
 
 import pyaudio
 import numpy as np
-import time
 
 FORMAT = pyaudio.paInt16 
 CHANNELS = 2
@@ -18,7 +17,6 @@ class Listener(object):
     def __init__(self):
         self.pa = pyaudio.PyAudio()
         self.stream = self.open_mic_stream()
-        self.errorcount = 0
 
     def stop(self):
         self.stream.close()
