@@ -5,6 +5,7 @@
 import pythonlights
 import sound
 import numpy as np
+import math
 
 ctrl = pythonlights.LEDControl()
 listener = sound.Listener()
@@ -15,6 +16,8 @@ longmean = shortmean = ones * 128 # long zum regeln, short zum glätten
 
 sound.INPUT_BLOCK_TIME = 0.1
 a = int(250*sound.INPUT_BLOCK_TIME) # Anzahl der Array Element um 250Hz abdecken
+
+t = 0
 
 while True:
     # Dieser Aufruf blockt, bis genug sample da ist.
@@ -36,6 +39,7 @@ while True:
 
     # Einstellen und senden der berechneten Farbe.
     color = pythonlights.Color(shortmean.astype(int))
-    ctrl.set_position(0, color)
-    ctrl.set_position(4, color)
+    ctrl.set_position(2, color)
+    t = (t + 1) % 100
+    ctrl.set_gnome(max(5,int(255*math.cos(2.0*t/200*math.pi)**2)))
     ctrl.send()

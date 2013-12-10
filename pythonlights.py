@@ -87,6 +87,10 @@ class LEDControl(object):
         for panel in range(5): 
             self.set_panel(panel, color)
 
+    def set_gnome(self, intensity):
+         self.state[64] = intensity
+
+
 class LEDUtils(LEDControl):
     def all_on(self):
         self.set_all('#ffffff')
