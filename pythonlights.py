@@ -90,6 +90,10 @@ class LEDControl(object):
     def set_gnome(self, intensity):
          self.state[64] = intensity
 
+    def set_pos_in_circ(self, position, color):
+         correct_pos = (position+15) % 25
+         self.set_color(correct_pos // 5, correct_pos % 5, color)
+
 
 class LEDUtils(LEDControl):
     def all_on(self):
