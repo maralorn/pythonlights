@@ -8,8 +8,9 @@ import numpy as np
 FORMAT = pyaudio.paInt16 
 CHANNELS = 2
 RATE = 44100  
-INPUT_BLOCK_TIME = 0.05
-INPUT_FRAMES_PER_BLOCK = int(RATE*INPUT_BLOCK_TIME)
+INPUT_BLOCK_TIME = 0.08
+GLIDING_DIVIDER = 4
+INPUT_FRAMES_PER_BLOCK = int(RATE*INPUT_BLOCK_TIME/GLIDING_DIVIDER)
 
 soundtype = np.dtype([('l',np.int16),('r',np.int16)])
 
@@ -17,6 +18,11 @@ class Listener(object):
     def __init__(self):
         self.pa = pyaudio.PyAudio()
         self.stream = self.open_mic_stream()
+        raw = self.listen()
+        for i in range(1,GLIDING_DIVIDER):
+            raw += self.listen()
+        stereodata = np.fromstring(raw,soundtype)
+        self.buf = (stereodata['l'] + stereodata['r'])/2
 
     def stop(self):
         self.stream.close()
@@ -47,4 +53,6 @@ class Listener(object):
         raw = self.listen()
         stereodata = np.fromstring(raw,soundtype)
         monodata = (stereodata['l'] + stereodata['r'])/2
-        return abs(np.fft.rfft(monodata))
+        self.buf[:-len(monodata)] = self.buf[len(monodata):]
+        self.buf[-len(monodata):] = monodata
+        return abs(np.fft.rfft(self.buf))

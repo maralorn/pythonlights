@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Trollhöhlen Lichtcontroller</title>
+		<link rel="stylesheet" type="text/css" href="static/style.css">
+		<script type="text/javascript" src="static/jscolor/jscolor.js"></script>
+	</head>
+	<body>
+		<span class='topmenu'><a href="#help">Help</> <a href="restart">Restart Daemon</a></span>
+		<h1>Trollhöhlen Lichtcontroller</h1>
+		<div class="presets">
+		<span>
+		{% for preset in presets %}
+		<a href="loadpreset/{{preset}}">{{preset}}</a>
+		{% endfor %}	
+		</span>
+		</div>
+		<div class='sidebar'>
+		<h2>Verfügbare Plugins</h2>
+		{% if plugin_error %}
+		<div class="error">
+		Es gab ein Problem beim Laden eines Plugins. <br><a href="error/">Klicke hier um Dir einen möglichen Fehler im Pluginordner anzeigen zu lassen.</a><br>
+		<a href="restart/">Oder hier um die Plugins neu zu laden.</a><br>
+		</div>
+		{% endif %}
+		<ul>
+			{% for plugin in plugins %}
+			<li><a href="create/{{ plugin }}">{{ plugin }}</a></li>
+			{% endfor %}
+		</ul>
+		</div>
+		<div class=plugins>
+		<h2>Aktive Plugins</h2>
+		{% for plugin in active_plugins %}
+		<div class="plugin">
+		<h3>{{ plugin.name }} <a href="delete/{{plugin.id}}">Entfernen</a></h3>
+		<p>
+			Angesprochene Leuchtdioden:
+			<span class='leds'>
+				{% for i in range(5) %}{% for j in range(5) %}&nbsp;{% if i*5+j in plugin.mapping %}{% if plugin.mapping.index(i*5+j) + 1 < 10 %}&nbsp;{% endif %}{{ plugin.mapping.index(i*5+j) +1 }}{% else %}&nbsp;&nbsp;{% endif %}{% endfor %}&nbsp;</span><span class='leds'>{% endfor %}
+			</span><br>
+			Priorität: <a href="setpriority/{{plugin.id}}/{{plugin.priority-1}}">&lt;- </a>{{plugin.priority}}<a href="setpriority/{{plugin.id}}/{{plugin.priority+1}}"> +&gt;</a>
+			<br>
+			{% if plugin.decay %}
+				Verfällt: {{ plugin.decay }}<br>
+			{% endif %}
+				Optionen:
+			{% for option in plugin.get_options() %}<div>
+				<form action="setoption/{{plugin.id}}/" method="POST">
+					{{plugin.options[option]['display_name']}}:
+					<input name="{{option}}" class="{{option}}" type="text" size="10" value="{{plugin.get_option(option)}}">
+					<input type="submit" value="set">
+				</form>
+			{{plugin.options[option]['comment']}}</div>
+			{% endfor %}
+		</p>
+		</div> <!-- class = plugin -->
+		{% endfor %}
+		</div><br style='clear:both;'><br>
+		<hr>
+		<h2 id="help">Dokumentation</h2>
+		<div class="docu">
+			<h3>Presetknöpfe</h3>
+			Wenn Du nicht weiter weißt, lade einfach einen der praktischen großen rot-weißen Presetknöpfe direkt am Seitenanfang.
+			Die Presets laden von sich aus eine passende Kombination von Plugins.
+			Zum Einstellen der Farben empfiehlt es sich in die Optionen der Plugins zu sehen.
+	
+			<h3>Plugins</h3>
+			Der Server geht jedesmal, wenn er die Beleuchtung berechnet alle aktiven Plugins absteigend nach Priorität durch.
+			Jedes Plugin hat dabei die Möglichkeit alle oder einen Teil der LEDs zu setzen.
+			Bei Konflikt gewinnt das letzte aufgerufene Plugin.
+			Jedes Plugin wirkt auf eine eingestellte Menge von LEDs.
+			Einige Plugins können den Sound vom Pulseaudio und damit dem MPD abnehmen und visualisieren.
+			Ein Plugin kann einen Verfallszeitpunkt haben nach dem es automatisch gelöscht wird.
+			
+			<h3>Eigene Plugins schreiben</h3>
+			Plugins für diese Anwendung liegen in <b>/home/chaos/pythonlights-plugins/</b>.
+			Jede Python Datei in diesem Verzeichnis wird nach Neustart der Anwendung geladen.
+			Hat ein Plugin einen Fehler, so kann dieser auf der Seite angezeigt werden.<br><br>
+			Neustart durch ausführen von oder klicken auf: <a href="restart"><b>/etc/init.d/pythonlights restart</b></a><br><br>
+			Die API und Beispiele sind in diesem Verzeichnis zu sehen.
+			<h3>Sonstiges</h3>
+			Die Anwendung selber liegt im Verzeichnis <b>/home/pythonlights/pythonlights/</b>.<br><br>
+			Dieser Daemon läuft auf whisky in der Trollhöhle und ist intern erreichbar über die URL <a href='http://whisky/light'>http://whisky/light</a>.
+			Der Server ist eine Python Anwendung die mit dem <a target="_blank" href="http://flask.pocoo.org/docs/">Flask Microframework</a> geschrieben wurde.<br>
+			Siehe auch: <a target="_blank" href="https://wiki.chaos-darmstadt.de/wiki/Raumbeleuchtung">Wiki Raumbeleuchtung</a> (Fragen auch gerne an <a href="mailto:malte.brandy@maralorn.de">maralorn</a>.)<br>
+			Disclaimer: Der Ersteller dieser Seite denkt nicht, dass er Ahnung von Webdesign hat.
+		</div>
+	</body>
+</html>
