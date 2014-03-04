@@ -139,7 +139,10 @@ class LEDPlugin(object):
 
 	def set_option(self, name, value):
 		self.lock.acquire()
-		self.options[name]['value'] = self.options[name]['type'](value)
+		try:
+			self.options[name]['value'] = self.options[name]['type'](value)
+		except ValueError:
+			print("Invalid value caught in set_option(...): {}".format(value))
 		self.lock.release()
 
 	def get_state(self):
