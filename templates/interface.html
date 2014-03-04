@@ -35,7 +35,7 @@
 		<div class="plugin">
 		<h3>{{ plugin.name }} <a href="delete/{{plugin.id}}">Entfernen</a></h3>
 		<p>
-			Angesprochene Leuchtdioden:
+			Angesprochene Leuchtdioden:<br />
 			<span class='leds'>
 				{% for i in range(5) %}{% for j in range(5) %}&nbsp;{% if i*5+j in plugin.mapping %}{% if plugin.mapping.index(i*5+j) + 1 < 10 %}&nbsp;{% endif %}{{ plugin.mapping.index(i*5+j) +1 }}{% else %}&nbsp;&nbsp;{% endif %}{% endfor %}&nbsp;</span><span class='leds'>{% endfor %}
 			</span><br>
