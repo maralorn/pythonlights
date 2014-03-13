@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="de">
+	<head>
+		<title>Trollhöhlen Lichtcontroller</title>
+		<script type="text/javascript" src="static/jscolor/jscolor.js"></script>
+		<link href="/css/bootstrap.min.css" rel="stylesheet">
+        <style type="text/css">
+            .popover { width: 350px; }
+        </style>
+	</head>
+	<body>
+		<header id="top" class="navbar navbar-static-top" role="banner" style="margin-bottom: 0px;">
+			<div class="container-fluid">
+				<nav class="collapse navbar-collapse">
+					<ul class="nav navbar-nav">
+						<li><a href="/light/">Zur&uuml;ck</a></li>
+					</ul>
+					<ul class="nav navbar-nav navbar-right">
+						<li><a href="help">Help</a></li>
+						<li><a href="restart">Restart Daemon</a></li>
+					</ul>
+				</nav>
+			</div>
+		</header>
+
+		<div id="head" style="color: #ffffff; background: #6C5296; padding-bottom: 40px;">
+			<div class="container">
+				<h1><a style="color: #ffffff;" href="/light/">python<strong>lights</strong></a></h1>
+				<p>Die Premium<sup>&#0153;</sup>-Lichtsteuerung in der Trollhöhle</p>
+			</div>
+		</div>
+
+		<div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h2 id="help">Dokumentation</h2>
+                    <h3>Presetknöpfe</h3>
+                    Wenn Du nicht weiter weißt, lade einfach einen der praktischen großen rot-weißen Presetknöpfe direkt am Seitenanfang.
+                    Die Presets laden von sich aus eine passende Kombination von Plugins.
+                    Zum Einstellen der Farben empfiehlt es sich in die Optionen der Plugins zu sehen.
+
+                    <h3>Plugins</h3>
+                    Der Server geht jedesmal, wenn er die Beleuchtung berechnet alle aktiven Plugins absteigend nach Priorität durch.
+                    Jedes Plugin hat dabei die Möglichkeit alle oder einen Teil der LEDs zu setzen.
+                    Bei Konflikt gewinnt das letzte aufgerufene Plugin.
+                    Jedes Plugin wirkt auf eine eingestellte Menge von LEDs.
+                    Einige Plugins können den Sound vom Pulseaudio und damit dem MPD abnehmen und visualisieren.
+                    Ein Plugin kann einen Verfallszeitpunkt haben nach dem es automatisch gelöscht wird.
+
+                    <h3>Eigene Plugins schreiben</h3>
+                    Plugins für diese Anwendung liegen in <b>/home/chaos/pythonlights-plugins/</b>.
+                    Jede Python Datei in diesem Verzeichnis wird nach Neustart der Anwendung geladen.
+                    Hat ein Plugin einen Fehler, so kann dieser auf der Seite angezeigt werden.<br><br>
+                    Neustart durch ausführen von oder klicken auf: <a href="restart"><b>/etc/init.d/pythonlights restart</b></a><br><br>
+                    Die API und Beispiele sind in diesem Verzeichnis zu sehen.
+                    <h3>Sonstiges</h3>
+                    Die Anwendung selber liegt im Verzeichnis <b>/home/pythonlights/pythonlights/</b>.<br><br>
+                    Dieser Daemon läuft auf whisky in der Trollhöhle und ist intern erreichbar über die URL <a href='http://whisky/light'>http://whisky/light</a>.
+                    Der Server ist eine Python Anwendung die mit dem <a target="_blank" href="http://flask.pocoo.org/docs/">Flask Microframework</a> geschrieben wurde.<br>
+                    Siehe auch: <a target="_blank" href="https://wiki.chaos-darmstadt.de/wiki/Raumbeleuchtung">Wiki Raumbeleuchtung</a> (Fragen auch gerne an <a href="mailto:malte.brandy@maralorn.de">maralorn</a>.)<br>
+                    Disclaimer: Der Ersteller dieser Seite denkt nicht, dass er Ahnung von Webdesign hat.<br />
+                    <br />
+                    <p>Der Ersteller _dieser_ Seite hat auch wenig Ahnung von Webdesign, hat das ganze aber mal gefixt. You're welcome!</p>
+
+                </div>
+            </div>
+		</div>
+        <br />
+
+        <script type="text/javascript" src="/js/jquery-2.1.0.min.js"></script>
+        <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+        <script>
+            $('[data-toggle="popover"]').popover({trigger: 'hover','placement': 'right'});
+        </script>
+	</body>
+</html>

@@ -6,6 +6,7 @@ plugin_error = None
 try:
 	from plugins import *
 except Exception as e:
+	print(e)
 	plugin_error = e
 import thread
 import time
@@ -27,13 +28,17 @@ pm = pl.LEDPluginMaster()
 def interface():
     plugins = pm.plugins[:]
     plugins.reverse()
-    return render_template('interface.html', plugins=pm.available_plugins(), active_plugins=plugins, presets=pm.available_presets(), plugin_error=(plugin_error!=None))
+    return render_template('interface.html', now=time.time(), plugins=pm.available_plugins(), active_plugins=plugins, presets=pm.available_presets(), plugin_error=(plugin_error!=None))
 
 @app.route("/error/")
 def error():
     if plugin_error is not None:
 	raise plugin_error
     return redirect(base_path)
+
+@app.route("/help/")
+def help():
+    return render_template("help.html")
 
 @app.route("/create/<plugin>/")
 def create(plugin):
