@@ -52,7 +52,7 @@ def loadpreset(preset):
 
 @app.route("/klingel/")
 def klingel():
-    pm.instanciate_plugin("Alarm", priority=100, decay=time.time()+10, mapping=range(0,25,2))
+    pm.instanciate_plugin("Alert", priority=100, decay=time.time()+10, mapping=range(0,25,2))
     return redirect(base_path)
 
 @app.route("/delete/<pluginid>/")

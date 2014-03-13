@@ -102,7 +102,7 @@
                                             <div class="form-group">
                                                 <label for="{{ option }}" class="col-sm-4 control-label">{{ plugin.options[option]['display_name'] }}:</label>
                                                 <div class="col-sm-2">
-                                                    <input type="number" class="form-control" name="{{ option }}" class="{{ option }}" size="10" value="{{ plugin.get_option(option) }}"
+																	<input type="text" class="form-control {{ option }}" name="{{ option }}" size="10" value="{{ plugin.get_option(option) }}"
                                                             data-toggle="popover" data-original-title="{{ option }}" data-content="{{plugin.options[option]['comment']}}">
                                                 </div>
                                             {% if plugin.options[option]['comment']|length > 0 %}
