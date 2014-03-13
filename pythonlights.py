@@ -164,6 +164,11 @@ class LEDPlugin(object):
 			"comment": comment
 		}
 
+        def autoenable_condition(self):
+            return 0  # -1 == disable,
+                      #  0 == unsupported
+                      #  1 == enable
+
 
 class LEDPluginMaster(LEDControl):
 
@@ -210,6 +215,16 @@ class LEDPluginMaster(LEDControl):
 	def available_presets(cls):
 		return [name for name in cls.presets]
 
+        def autotoggle_check(self):
+                for name, plugin in LEDPluginMaster.registered_plugins.iteritems():
+                        p = plugin(0, range(25), None)
+                        state = p.autoenable_condition()
+                        if state == -1:
+                            self.remove_plugin_by_name(name)
+                        elif state == 1:
+                            if not self.get_plugin_by_name(name):
+                                self.instanciate_plugin(name)
+
 	def run_preset(self, name):
 		self.lock.acquire()
 		self.presets[name](self)
@@ -227,6 +242,11 @@ class LEDPluginMaster(LEDControl):
 		self.plugins.remove(self.get_plugin(pluginid))
 		self.lock.release()
 
+        def remove_plugin_by_name(self, name):
+                plugin = self.get_plugin_by_name(name)
+                if plugin != None:
+                    self.remove_plugin(plugin.id)
+
 	def get_plugin(self, pluginid):
 		self.lock.acquire()
 		plugin = None
@@ -236,11 +256,31 @@ class LEDPluginMaster(LEDControl):
 		self.lock.release()
 		return plugin
 
+        def get_plugin_by_name(self, name):
+                self.lock.acquire()
+                for plugin in self.plugins:
+                        if plugin.name == name:
+                                return plugin
+                self.lock.release()
+                return None
+
 	def run(self):
 		self.exit = False
+                self.autotoggle_ts = time.time()
 		while not self.exit:
-			self.send()
-			time.sleep(0.01)
+			self.update()
+			time.sleep(0.02)
+
+        def update(self):
+                # query plugins and send new colors
+                self.send()
+
+                # check for auto-toggle
+                now = time.time()
+                diff = now - self.autotoggle_ts
+                if diff > 1.0:
+                        self.autotoggle_check()
+                        self.autotoggle_ts = now
 
 	def clear(self):
 		self.lock.acquire()
