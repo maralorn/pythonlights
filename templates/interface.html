@@ -27,8 +27,13 @@
 
 		<div id="head" style="color: #ffffff; background: #6C5296; padding-bottom: 40px;">
 			<div class="container">
-				<h1><a style="color: #ffffff;" href="/light/">python<strong>lights</strong></a></h1>
+				<h1><a style="color: #ffffff;" href="/light/">python<span style="font-weight: 900">lights</span></a></h1>
 				<p>Die Premium<sup>&#0153;</sup>-Lichtsteuerung in der Trollhöhle</p>
+                {% for pos in colors %}
+		{% if colors[pos] is defined %}
+                <div id="global_color_{{ pos }}" style="padding:5px 18px;display:inline;background:{{ colors[pos].to_html(colors[pos].values) }}"></div>
+		{% endif %}
+                {% endfor %}
 			</div>
 		</div>
 
@@ -52,6 +57,11 @@
 			<div class="row">
 				<div class="col-md-9">
                     <br />
+					{% if active_plugins|length == 0 %}
+					<div class="well">
+					Kein Plugin geladen.
+					</div>
+					{% endif %}
 					<!-- Plugin Settings -->
                     <div class="panel-group" id="plugins">
 					{% for plugin in active_plugins %}
@@ -66,59 +76,56 @@
                                     <a href="setpriority/{{ plugin.id }}/{{ plugin.priority -1 }}"><span class="glyphicon glyphicon-minus"></span></a>
                                     <strong>{{ plugin.priority }}</strong>
                                     <a href="setpriority/{{ plugin.id }}/{{ plugin.priority +1 }}"><span class="glyphicon glyphicon-plus"></span></a>
-                                </div>
+                                </div><br />
+                                <!-- Mapping -->
+                                {% if plugin.state %}
+                                <table class="table table-bordered" style="width: 750px; margin-bottom: 0px; padding-top: 5px;">
+                                    <tr>
+                                        <!--<td style="padding: 0px 5px; border-color: #F5F5F5;"><span class="glyphicon glyphicon-tint"></span></td>-->
+                                        {% for i in range(5) %}
+                                        <!-- LED-Blöcke -->
+                                        <td style="width:20%; text-align: justify; padding: 0px;">
+                                            <table style="width: 100%">
+                                                <tr>
+                                                {% for j in range(5) %}
+                                                <!-- Block {{ j + 1 }} -->
+                                                    {% if i*5+j in plugin.mapping %}
+                                                    <td style="width: 20%; text-align: center; color: {{ plugin.state[i*5+j].to_html(plugin.state[i*5+j].get_complementary_color()) }}; background: {{ plugin.state[i*5+j].to_html(plugin.state[i*5+j].values) }}">{{ i*5+j }}</td>
+                                                    {% else %}
+                                                    <td style="width: 20%; text-align: center; color: #9F9F9F;">{{ i*5+j }}</td>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                </tr>
+                                            </table>
+                                        </td>
+                                        {% endfor %}
+                                    </tr>
+                                </table>
+                                {% endif %}
+                                <!-- Mapping ENDE -->
                             </div>
                             <div id="plugin{{ plugin.id }}" class="panel-collapse collapse out">
                                 <div class="panel-body">
-                                    <!-- Mapping -->
-                                    <table class="table table-bordered" style="width: 750px;">
-                                        <tr>
-                                            <td><span class="glyphicon glyphicon-adjust"></span></td>
-                                            {% for i in range(5) %}
-                                            <!-- LED-Blöcke -->
-                                            <td style="width:20%; text-align: justify;">
-                                                <table style="width: 100%">
-                                                    <tr>
-                                                    {% for j in range(5) %}
-                                                    <!-- Block {{ j + 1 }} -->
-                                                        {% if i*5+j in plugin.mapping %}
-                                                        <td style="width: 20%; text-align: center;">{{ i*5+j }}</td>
-                                                        {% else %}
-                                                        <td style="width: 20%; text-align: center; background: #000000; color: #FFFFFF;">{{ i*5+j }}</td>
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                    </tr>
-                                                </table>
-                                            </td>
-                                            {% endfor %}
-                                        </tr>
-                                    </table>
-                                    <!-- Mapping ENDE -->
-                                    <!-- Optionen -->
-                                    {% if plugin.get_options()|length > 0 %}
-                                    <div class="well">
-                                        <form class="form-horizontal" action="setoption/{{ plugin.id }}/" method="POST" role="form">
-                                        {% for option in plugin.get_options() %}
-                                            <div class="form-group">
-                                                <label for="{{ option }}" class="col-sm-4 control-label">{{ plugin.options[option]['display_name'] }}:</label>
-                                                <div class="col-sm-2">
-																	<input type="text" class="form-control {{ option }}" name="{{ option }}" size="10" value="{{ plugin.get_option(option) }}"
-                                                            data-toggle="popover" data-original-title="{{ option }}" data-content="{{plugin.options[option]['comment']}}">
-                                                </div>
-                                            {% if plugin.options[option]['comment']|length > 0 %}
-                                            <!--{{plugin.options[option]['comment']}}-->
-                                            {% endif %}
+                                <!-- Optionen -->
+                                {% if plugin.get_options()|length > 0 %}
+                                    <form class="form-horizontal" action="setoption/{{ plugin.id }}/" method="POST" role="form">
+                                    {% for option in plugin.get_options() %}
+                                        <div class="form-group">
+                                            <label for="{{ option }}" class="col-sm-4 control-label">{{ plugin.options[option]['display_name'] }}:</label>
+                                            <div class="col-sm-2">
+                                                <input type="text" class="form-control {{ option }}" name="{{ option }}" size="10" value="{{ plugin.get_option(option) }}"
+                                                        data-toggle="popover" data-original-title="{{ option }}" data-content="{{plugin.options[option]['comment']}}">
                                             </div>
-                                        {% endfor %}
-                                            <div class="form-group">
-                                                <div class="col-sm-offset-2 col-sm-4">
-                                                <button type="submit" class="btn btn-success">Update</button>
-                                                </div>
+                                        </div>
+                                    {% endfor %}
+                                        <div class="form-group">
+                                            <div class="col-sm-offset-4 col-sm-4">
+                                            <button type="submit" class="btn btn-success">Update</button>
                                             </div>
-                                        </form>
-                                    </div>
-                                    {% endif %}
-                                    <!-- Optionen ENDE -->
+                                        </div>
+                                    </form>
+                                {% endif %}
+                                <!-- Optionen ENDE -->
                                 </div>
                             </div>
                         </div>

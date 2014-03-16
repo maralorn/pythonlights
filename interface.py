@@ -17,7 +17,7 @@ import subprocess
 import sys
 
 log = open(os.path.dirname(os.path.realpath(__file__)) + "/interface.log", 'a')
-#sys.stdout = sys.stderr = log
+sys.stdout = sys.stderr = log
 
 app = Flask(__name__)
 
@@ -30,7 +30,7 @@ pm = pl.LEDPluginMaster()
 def interface():
     plugins = pm.plugins[:]
     plugins.reverse()
-    return render_template('interface.html', now=time.time(), plugins=pm.available_plugins(), active_plugins=plugins,
+    return render_template('interface.html', now=time.time(), colors=pm.color_state, plugins=pm.available_plugins(), active_plugins=plugins,
                            presets=pm.available_presets(), plugin_error=(plugin_error != None))
 
 

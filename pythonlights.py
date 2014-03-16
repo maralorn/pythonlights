@@ -7,13 +7,13 @@ import threading
 
 HOST = '2.0.0.2'
 PORT = 6454
-HEADER = b'Art-Net' + bytearray((00, # Protocol Name
-                                 00, 80, # Opcode
-                                 00, 14, # Protocol Version
-                                 00,	 # Sequence
-                                 00,	 # Physical
-                                 00, 00, # Universe
-                                 00, 80))# Payload length (5 Panels with 16 channels)
+HEADER = b'Art-Net' + bytearray((00,  # Protocol Name
+                                 00, 80,  # Opcode
+                                 00, 14,  # Protocol Version
+                                 00,  # Sequence
+                                 00,  # Physical
+                                 00, 00,  # Universe
+                                 00, 80))  # Payload length (5 Panels with 16 channels)
 
 # panel: 0-4
 # position: 0-4
@@ -25,19 +25,19 @@ def get_led_number(panel, position, colorid):
         raise ValueError("There are only 5 positions in a panel. Pick from 0 to 4. Not {0}".format(position))
     if colorid < 0 or colorid > 2:
         raise ValueError("Only 0 for red, 1 for green and 2 for blue are valid color ids. Not {0}".format(colorid))
-    return int(panel)*16+int(position)*3+int(colorid)+1
+    return int(panel) * 16 + int(position) * 3 + int(colorid) + 1
 
 
 class Color(object):
     # Takes a string '#rrggbb' or a iterable of 3 integers
-    def __init__(self, values = None):
+    def __init__(self, values=None):
         if values is not None:
             if type(values) == str:
                 self.parse_string(values)
             else:
                 self.values = list(values)
         else:
-            self.values = [0,0,0]
+            self.values = [0, 0, 0]
 
     def parse_string(self, string):
         if string[0] == "#":
@@ -47,6 +47,18 @@ class Color(object):
             self.values = [int(x, 16) for x in split]
         except:
             raise ValueError("Unkown color format '{0}'".format(string))
+
+    def get_complementary_color(self):
+        a = 1 - (0.299 * self.values[0] + 0.587 * self.values[1] + 0.114 * self.values[2]) / 255
+        if a < 0.5:
+            d = 0
+        else:
+            d = 255
+        return [d, d, d]
+
+    def to_html(self, rgb):
+        return '#%02x%02x%02x' % (rgb[0], rgb[1], rgb[2])
+
 
 # LED Controller for the troll cave.
 # Color parameters take a string (currently only "#rrggbb" format), tuple of 3 integers in [0,255] or Color objects.
@@ -59,7 +71,7 @@ class LEDControl(object):
 
     # Call this method or nothing will happen!!
     def send(self):
-        package = HEADER+bytearray(self.state)
+        package = HEADER + bytearray(self.state)
         self.socket.send(package)
 
     def set_intensity(self, panel, position, colorid, value):
@@ -96,8 +108,9 @@ class LEDControl(object):
         self.state[64] = intensity
 
     def set_pos_in_circ(self, position, color):
-        correct_pos = (position+15) % 25
+        correct_pos = (position + 15) % 25
         self.set_color(correct_pos // 5, correct_pos % 5, color)
+
 
 class LEDUtils(LEDControl):
     def all_on(self):
@@ -108,11 +121,13 @@ class LEDUtils(LEDControl):
         self.set_all('#000000')
         self.send()
 
+
 class LEDPlugin(object):
     "Inherit this class, and implement the get_state method returning a list of colors with the length of mapping"
     name = "Plugin name not set"
-    def __init__(self, priority = 0, mapping = range(25), decay=None):
-        self.id = random.randint(0,2**32-1)
+
+    def __init__(self, priority=0, mapping=range(25), decay=None):
+        self.id = random.randint(0, 2 ** 32 - 1)
         self.priority = priority
         self.mapping = mapping
         self.decay = decay
@@ -146,7 +161,7 @@ class LEDPlugin(object):
         self.lock.release()
 
     def get_state(self):
-        return [Color((0,0,0)) for i in self.mapping]
+        return [Color((0, 0, 0)) for i in self.mapping]
 
     def get_state_safe(self):
         self.lock.acquire()
@@ -154,31 +169,32 @@ class LEDPlugin(object):
         self.lock.release()
         return state
 
-    def register_option(self, name, typ, default, display_name = None, comment = ""):
-        if display_name == None:
+    def register_option(self, name, typ, default, display_name=None, comment=""):
+        if display_name is None:
             display_name = name
-        self.options[name] = {
-        "type": typ,
-        "value": default,
-        "display_name": display_name,
-        "comment": comment
-        }
+        self.options[name] = {"type": typ,
+                              "value": default,
+                              "display_name": display_name,
+                              "comment": comment}
 
     def autoenable_condition(self):
-        return 0	# -1 == disable,
-    #  0 == unsupported
-    #  1 == enable
+        # -1 == disable,
+        #  0 == unsupported
+        #  1 == enable
+        return 0
 
 
 class LEDPluginMaster(LEDControl):
-
     registered_plugins = {}
     presets = {}
+
     def __init__(self):
         LEDControl.__init__(self)
         self.set_gnome(0)
         self.plugins = []
+        self.color_state = []
         self.lock = threading.RLock()
+        self.autotoggle_ts = time.time()
 
     def sort(self):
         self.lock.acquire()
@@ -188,13 +204,16 @@ class LEDPluginMaster(LEDControl):
     def send(self):
         self.lock.acquire()
         self.sort()
+        new_state = {}
         for plugin in self.plugins[:]:
             if plugin.decay and plugin.decay < time.time():
                 self.plugins.remove(plugin)
             else:
-                state = plugin.get_state_safe()
+                plugin.state = plugin.get_state_safe()
                 for key, index in enumerate(plugin.mapping):
-                    self.set_pos_in_circ(index, state[key])
+                    self.set_pos_in_circ(index, plugin.state[key])
+                    new_state[key] = plugin.state[key]
+        self.color_state = new_state
         if len(self.plugins) > 0:
             LEDControl.send(self)
         self.lock.release()
@@ -217,13 +236,17 @@ class LEDPluginMaster(LEDControl):
 
     def autotoggle_check(self):
         for name, plugin in LEDPluginMaster.registered_plugins.iteritems():
-            p = plugin(0, range(25), None)
-            state = p.autoenable_condition()
-            if state == -1:
-                self.remove_plugin_by_name(name)
-            elif state == 1:
-                if not self.get_plugin_by_name(name):
-                    self.instanciate_plugin(name, 10)
+            try:
+                p = plugin(0, range(25), None)
+                state = p.autoenable_condition()
+                if state == -1:
+                    self.remove_plugin_by_name(name)
+                elif state == 1:
+                    if self.get_plugin_by_name(name) is None:
+                        self.instanciate_plugin(name, 10)
+                del p, state
+            except Exception:
+                pass
 
     def run_preset(self, name):
         self.lock.acquire()
@@ -231,12 +254,10 @@ class LEDPluginMaster(LEDControl):
         self.lock.release()
 
     def instanciate_plugin(self, name, priority=0, mapping=range(25), decay=None):
-        print("Load %s (Prio: %d)" % (name, priority))
         self.lock.acquire()
         plugin = LEDPluginMaster.registered_plugins[name](priority, mapping, decay)
         self.plugins.append(plugin)
         self.lock.release()
-        print("Loaded")
         return plugin
 
     def remove_plugin(self, pluginid):
@@ -266,7 +287,12 @@ class LEDPluginMaster(LEDControl):
 
     def run(self):
         self.exit = False
-        self.autotoggle_ts = time.time()
+
+        # init to a color that is friendly to the eye
+        grey = Color([105, 105, 105])
+        for i in range(25):
+            self.set_pos_in_circ(i, grey)
+
         while not self.exit:
             self.update()
             time.sleep(0.02)
@@ -278,8 +304,8 @@ class LEDPluginMaster(LEDControl):
         # check for auto-toggle
         now = time.time()
         diff = now - self.autotoggle_ts
-        if diff > 1.0:
-            self.autotoggle_check()
+        if diff > 5.0:
+            #self.autotoggle_check()
             self.autotoggle_ts = now
 
     def clear(self):
@@ -287,13 +313,16 @@ class LEDPluginMaster(LEDControl):
         self.plugins = []
         self.lock.release()
 
+
 class Black(LEDPlugin):
     name = "Schwarz"
+
 LEDPluginMaster.register_plugin(Black)
+
 
 def aus(pm):
     pm.plugins = []
-    pm.instanciate_plugin('Schwarz', decay=time.time()+1)
+    pm.instanciate_plugin('Schwarz', decay=time.time() + 1)
 
 #aus.name = 'Alles Aus'
 #LEDPluginMaster.register_preset(aus)
