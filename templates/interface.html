@@ -18,9 +18,9 @@
 					{% endfor %}
 					</ul>
 					<ul class="nav navbar-nav navbar-right">
-                        <li><a href="javascript:toggle_autoupdate()">Auto-Refresh</a></li>
-						<li><a href="help">Help</a></li>
-						<li><a href="restart">Restart Daemon</a></li>
+						<li id="autorefresh"><a href="javascript:toggle_autoupdate()"><span class="glyphicon glyphicon-refresh"></span>&nbsp;Auto-Refresh</a></li>
+						<li><a href="help"><span class="glyphicon glyphicon-question-sign"></span>&nbsp;Help</a></li>
+						<li><a href="restart"><span class="glyphicon glyphicon-off"></span>&nbsp;Restart</a></li>
 					</ul>
 				</nav>
 			</div>
@@ -31,9 +31,9 @@
 				<h1><a style="color: #ffffff;" href="/light/">python<span style="font-weight: 900">lights</span></a></h1>
 				<p>Die Premium<sup>&#0153;</sup>-Lichtsteuerung in der Trollhöhle</p>
 				{% for pos in colors %}
-		        {% if colors[pos] is defined %}
-   				<div id="global_color_{{ pos }}" style="padding:5px 19px;display:inline;background:{{ colors[pos].to_html(colors[pos].values) }}"></div>
-        		{% endif %}
+				{% if colors[pos] is defined %}
+				<div id="global_color_{{ pos }}" style="padding:5px 19px;display:inline;background:{{ colors[pos].to_html(colors[pos].values) }}"></div>
+				{% endif %}
 				{% endfor %}
 			</div>
 		</div>
@@ -148,31 +148,35 @@
 		<script>
 			$('[data-toggle="popover"]').popover({trigger: 'hover','placement': 'right'});
 
-            var autoupdate = false;
-            function update() {
-                if (autoupdate) {
-                    $.getJSON("api/colors.json", function (data) {
-                        $.each(data['global'], function (index, color) {
-                           elem = document.getElementById('global_color_' + index);
-                           elem.style.background = color;
-                        });
+			var autoupdate = false;
+			function update() {
+				if (autoupdate) {
+					$.getJSON("api/colors.json", function (data) {
+						$.each(data['global'], function (index, color) {
+						   $('#global_color_' + index).css('background', color)
+						});
 
-                        $.each(data['plugins'], function (plugin, colors) {
-                            $.each(colors, function(index, color) {
-                                elem = document.getElementById('plugin_' + plugin + '_color_' + index)
-                                elem.style.background = color['color'];
-                                elem.style.color = color['label']
-                            })
-                        })
-                    });
-                }
-            }
+						$.each(data['plugins'], function (plugin, colors) {
+							$.each(colors, function(index, color) {
+								$('#plugin_'+plugin+'_color_'+index).css('background', color['color']);
+								$('#plugin_'+plugin+'_color_'+index).css('color', color['label']);
+							})
+						})
+					});
+				}
+			}
 
-            function toggle_autoupdate() {
-                autoupdate = !autoupdate;
-            }
+			function toggle_autoupdate() {
+				autoupdate = !autoupdate;
+				elem = document.getElementById('autorefresh');
+				if (autoupdate) {
+					elem.style.fontWeight = 900;
+				} else {
+					elem.style.fontWeight = 400;
+				}
+			}
 
-            setInterval(update, 120);
+			setInterval(update, 125);
 		</script>
 	</body>
 </html>
