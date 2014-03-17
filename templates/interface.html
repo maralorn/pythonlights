@@ -145,10 +145,14 @@
 		</div>
 		<script type="text/javascript" src="/js/jquery-2.1.0.min.js"></script>
 		<script type="text/javascript" src="/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="/js/jquery.cookie.js"></script>
 		<script>
 			$('[data-toggle="popover"]').popover({trigger: 'hover','placement': 'right'});
 
-			var autoupdate = false;
+			var autoupdate = $.cookie("autoupdate") == "true";
+			if (autoupdate == true)
+				$('#autorefresh').css('fontWeight', 900);
+
 			function update() {
 				if (autoupdate) {
 					$.getJSON("api/colors.json", function (data) {
@@ -168,11 +172,11 @@
 
 			function toggle_autoupdate() {
 				autoupdate = !autoupdate;
-				elem = document.getElementById('autorefresh');
+				$.cookie('autoupdate', autoupdate, { expires: 1 });
 				if (autoupdate) {
-					elem.style.fontWeight = 900;
+					$('#autorefresh').css('fontWeight', 900);
 				} else {
-					elem.style.fontWeight = 400;
+					$("#autorefresh").css('fontWeight', 400);
 				}
 			}
 
