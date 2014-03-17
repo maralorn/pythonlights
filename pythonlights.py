@@ -48,6 +48,9 @@ class Color(object):
         except:
             raise ValueError("Unkown color format '{0}'".format(string))
 
+    def get_color(self):
+        return self.values
+
     def get_complementary_color(self):
         a = 1 - (0.299 * self.values[0] + 0.587 * self.values[1] + 0.114 * self.values[2]) / 255
         if a < 0.5:
@@ -56,7 +59,8 @@ class Color(object):
             d = 255
         return [d, d, d]
 
-    def to_html(self, rgb):
+    @staticmethod
+    def to_html(rgb):
         return '#%02x%02x%02x' % (rgb[0], rgb[1], rgb[2])
 
 

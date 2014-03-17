@@ -18,6 +18,7 @@
 					{% endfor %}
 					</ul>
 					<ul class="nav navbar-nav navbar-right">
+                        <li><a href="javascript:toggle_autoupdate()">Auto-Refresh</a></li>
 						<li><a href="help">Help</a></li>
 						<li><a href="restart">Restart Daemon</a></li>
 					</ul>
@@ -30,9 +31,9 @@
 				<h1><a style="color: #ffffff;" href="/light/">python<span style="font-weight: 900">lights</span></a></h1>
 				<p>Die Premium<sup>&#0153;</sup>-Lichtsteuerung in der Trollhöhle</p>
 				{% for pos in colors %}
-		{% if colors[pos] is defined %}
-				<div id="global_color_{{ pos }}" style="padding:5px 18px;display:inline;background:{{ colors[pos].to_html(colors[pos].values) }}"></div>
-		{% endif %}
+		        {% if colors[pos] is defined %}
+   				<div id="global_color_{{ pos }}" style="padding:5px 19px;display:inline;background:{{ colors[pos].to_html(colors[pos].values) }}"></div>
+        		{% endif %}
 				{% endfor %}
 			</div>
 		</div>
@@ -90,9 +91,9 @@
 												{% for j in range(5) %}
 												<!-- Block {{ j + 1 }} -->
 													{% if i*5+j in plugin.mapping %}
-													<td style="width: 20%; text-align: center; color: {{ plugin.state[i*5+j].to_html(plugin.state[i*5+j].get_complementary_color()) }}; background: {{ plugin.state[i*5+j].to_html(plugin.state[i*5+j].values) }}">{{ i*5+j }}</td>
+													<td id="plugin_{{ plugin.id }}_color_{{ i*5+j }}" style="width: 20%; text-align: center; color: {{ plugin.state[i*5+j].to_html(plugin.state[i*5+j].get_complementary_color()) }}; background: {{ plugin.state[i*5+j].to_html(plugin.state[i*5+j].values) }}">{{ i*5+j }}</td>
 													{% else %}
-													<td style="width: 20%; text-align: center; color: #9F9F9F;">{{ i*5+j }}</td>
+													<td id="plugin_{{ plugin.id }}_color_{{ i*5+j }}" style="width: 20%; text-align: center; color: #9F9F9F;">{{ i*5+j }}</td>
 													{% endif %}
 												{% endfor %}
 												</tr>
@@ -146,6 +147,32 @@
 		<script type="text/javascript" src="/js/bootstrap.min.js"></script>
 		<script>
 			$('[data-toggle="popover"]').popover({trigger: 'hover','placement': 'right'});
+
+            var autoupdate = false;
+            function update() {
+                if (autoupdate) {
+                    $.getJSON("api/colors.json", function (data) {
+                        $.each(data['global'], function (index, color) {
+                           elem = document.getElementById('global_color_' + index);
+                           elem.style.background = color;
+                        });
+
+                        $.each(data['plugins'], function (plugin, colors) {
+                            $.each(colors, function(index, color) {
+                                elem = document.getElementById('plugin_' + plugin + '_color_' + index)
+                                elem.style.background = color['color'];
+                                elem.style.color = color['label']
+                            })
+                        })
+                    });
+                }
+            }
+
+            function toggle_autoupdate() {
+                autoupdate = !autoupdate;
+            }
+
+            setInterval(update, 120);
 		</script>
 	</body>
 </html>

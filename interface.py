@@ -15,6 +15,7 @@ import os
 import os.path
 import subprocess
 import sys
+import json
 
 log = open(os.path.dirname(os.path.realpath(__file__)) + "/interface.log", 'a')
 sys.stdout = sys.stderr = log
@@ -82,6 +83,32 @@ def setoption(pluginid):
     for option in request.form:
         pm.get_plugin(int(pluginid)).set_option(option, request.form[option])
     return redirect(base_path)
+
+@app.route("/api/colors.json")
+def get_colors_as_json():
+    """
+     build a dict to expose the current global and invidiual plugin colors as a json object
+    """
+    out = {"global": {}, "plugins": {}}
+
+    # global
+    for index, color in pm.color_state.iteritems():
+        if type(color) is pl.Color:
+            out["global"][index] = pl.Color.to_html(color.get_color())
+        else:
+            print("Type: %s" % type(color))
+            out["global"][index] = None
+
+    # plugins
+    for plugin in pm.plugins:
+        id = plugin.id
+        out["plugins"][id] = {}
+        # out["plugins"][id][index]
+        for index, color in enumerate(plugin.state):
+            if type(color) is pl.Color:
+                out["plugins"][id][plugin.mapping[index]] = {"color": pl.Color.to_html(color.get_color()),
+                                                             "label": pl.Color.to_html(color.get_complementary_color())}
+    return json.dumps(out)
 
 
 @app.route("/restart/")
