@@ -149,12 +149,13 @@
 		<script>
 			$('[data-toggle="popover"]').popover({trigger: 'hover','placement': 'right'});
 
+			var plugins_active = {{ active_plugins|length }}
 			var autoupdate = $.cookie("autoupdate") == "true";
 			if (autoupdate == true)
 				$('#autorefresh').css('fontWeight', 900);
 
 			function update() {
-				if (autoupdate) {
+				if (plugins_active > 0 && autoupdate) {
 					$.getJSON("api/colors.json", function (data) {
 						$.each(data['global'], function (index, color) {
 						   $('#global_color_' + index).css('background', color)
