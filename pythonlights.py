@@ -134,6 +134,7 @@ class LEDPlugin(object):
         self.id = random.randint(0, 2 ** 32 - 1)
         self.priority = priority
         self.mapping = mapping
+        self.state = []
         self.decay = decay
         self.options = {}
         self.lock = threading.RLock()
@@ -181,7 +182,8 @@ class LEDPlugin(object):
                               "display_name": display_name,
                               "comment": comment}
 
-    def autoenable_condition(self):
+    @staticmethod
+    def autoenable_condition():
         # -1 == disable,
         #  0 == unsupported
         #  1 == enable
@@ -196,7 +198,7 @@ class LEDPluginMaster(LEDControl):
         LEDControl.__init__(self)
         self.set_gnome(0)
         self.plugins = []
-        self.color_state = []
+        self.color_state = {} 
         self.lock = threading.RLock()
         self.autotoggle_ts = time.time()
 
@@ -241,14 +243,13 @@ class LEDPluginMaster(LEDControl):
     def autotoggle_check(self):
         for name, plugin in LEDPluginMaster.registered_plugins.iteritems():
             try:
-                p = plugin(0, range(25), None)
-                state = p.autoenable_condition()
+                state = plugin.autoenable_condition()
                 if state == -1:
                     self.remove_plugin_by_name(name)
                 elif state == 1:
                     if self.get_plugin_by_name(name) is None:
                         self.instanciate_plugin(name, 10)
-                del p, state
+                del state
             except Exception:
                 pass
 
@@ -309,7 +310,7 @@ class LEDPluginMaster(LEDControl):
         now = time.time()
         diff = now - self.autotoggle_ts
         if diff > 5.0:
-            #self.autotoggle_check()
+            self.autotoggle_check()
             self.autotoggle_ts = now
 
     def clear(self):
