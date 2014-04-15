@@ -137,6 +137,7 @@ class LEDPlugin(object):
         self.state = []
         self.decay = decay
         self.options = {}
+        self._log = []
         self.lock = threading.RLock()
         self.lock.acquire()
         self.init()
@@ -144,6 +145,15 @@ class LEDPlugin(object):
 
     def init(self):
         pass
+
+    def destroy(self):
+        pass
+
+    def log(self, str):
+        self._log = [str] + self._log
+
+    def get_log(self):
+        return self._log
 
     def get_option(self, name):
         self.lock.acquire()
@@ -218,7 +228,7 @@ class LEDPluginMaster(LEDControl):
                 plugin.state = plugin.get_state_safe()
                 for key, index in enumerate(plugin.mapping):
                     self.set_pos_in_circ(index, plugin.state[key])
-                    new_state[key] = plugin.state[key]
+                    new_state[plugin.mapping[key]] = plugin.state[key]
         self.color_state = new_state
         if len(self.plugins) > 0:
             LEDControl.send(self)
@@ -267,7 +277,10 @@ class LEDPluginMaster(LEDControl):
 
     def remove_plugin(self, pluginid):
         self.lock.acquire()
-        self.plugins.remove(self.get_plugin(pluginid))
+        plugin = self.get_plugin(pluginid)
+        if plugin is not None:
+            plugin.destroy()
+            self.plugins.remove(plugin)
         self.lock.release()
 
     def remove_plugin_by_name(self, name):
@@ -309,7 +322,7 @@ class LEDPluginMaster(LEDControl):
         # check for auto-toggle
         now = time.time()
         diff = now - self.autotoggle_ts
-        if diff > 5.0:
+        if diff > 1.0:
             self.autotoggle_check()
             self.autotoggle_ts = now
 

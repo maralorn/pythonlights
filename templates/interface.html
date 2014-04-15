@@ -30,9 +30,11 @@
 			<div class="container">
 				<h1><a style="color: #ffffff;" href="/light/">python<span style="font-weight: 900">lights</span></a></h1>
 				<p>Die Premium<sup>&#0153;</sup>-Lichtsteuerung in der Trollhöhle</p>
-				{% for pos in colors %}
+				{% for pos in range(25) %}
 				{% if colors[pos] is defined %}
 				<div id="global_color_{{ pos }}" style="padding:5px 19px;display:inline;background:{{ colors[pos].to_html(colors[pos].values) }}"></div>
+				{% else %}
+				<div id="global_color_{{ pos }}" style="padding:5px 19px;display:inline;"></div>
 				{% endif %}
 				{% endfor %}
 			</div>
@@ -90,11 +92,7 @@
 												<tr>
 												{% for j in range(5) %}
 												<!-- Block {{ j + 1 }} -->
-													{% if i*5+j in plugin.mapping %}
-													<td id="plugin_{{ plugin.id }}_color_{{ i*5+j }}" style="width: 20%; text-align: center; color: {{ plugin.state[i*5+j].to_html(plugin.state[i*5+j].get_complementary_color()) }}; background: {{ plugin.state[i*5+j].to_html(plugin.state[i*5+j].values) }}">{{ i*5+j }}</td>
-													{% else %}
 													<td id="plugin_{{ plugin.id }}_color_{{ i*5+j }}" style="width: 20%; text-align: center; color: #9F9F9F;">{{ i*5+j }}</td>
-													{% endif %}
 												{% endfor %}
 												</tr>
 											</table>
@@ -127,6 +125,14 @@
 									</form>
 								{% endif %}
 								<!-- Optionen ENDE -->
+								{% if debug %}
+								<!-- Logging -->
+								<pre>
+{% for item in plugin.get_log() %}
+{{ item }}{% endfor %}
+								</pre>
+								<!-- Loggging ENDE -->
+								{% endif %}
 								</div>
 							</div>
 						</div>

@@ -25,6 +25,8 @@ app = Flask(__name__)
 base_path = '/light'
 pm = pl.LEDPluginMaster()
 
+debug = False
+
 
 @app.route("/")
 @app.route("/index.html")
@@ -32,7 +34,7 @@ def interface():
     plugins = pm.plugins[:]
     plugins.reverse()
     return render_template('interface.html', now=time.time(), colors=pm.color_state, plugins=pm.available_plugins(), active_plugins=plugins,
-                           presets=pm.available_presets(), plugin_error=(plugin_error != None))
+                           presets=pm.available_presets(), plugin_error=(plugin_error != None), debug=debug)
 
 
 @app.route("/error/")
